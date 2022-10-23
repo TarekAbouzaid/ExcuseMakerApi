@@ -8,5 +8,5 @@ public interface IExcuseDatabase
     public Task<Excuse> GetExcuseById(int id);
     public Task<IEnumerable<Excuse>> GetAllExcuses();
     public Task<bool> DeleteExcuse(int id);
-    public Task<bool> UpdateExcuse(Excuse excuse;
+    public Task<bool> UpdateExcuse(Excuse excuse);
 }

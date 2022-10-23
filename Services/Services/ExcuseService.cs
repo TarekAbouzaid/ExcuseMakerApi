@@ -2,6 +2,7 @@
 using Persistance.Interfaces;
 using Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Services.Services
 {
@@ -16,9 +17,16 @@ namespace Services.Services
             _logger = logger;
         }
 
-        public Task<bool> Add(Excuse ex)
+        public async Task<bool> Add(Excuse ex)
         {
-            throw new NotImplementedException();
+            var added = await _database.Add(ex);
+            if (!added)
+            {
+                _logger.LogError("Something went wrong adding excuse!");
+                throw new Exception(HttpStatusCode.BadRequest + "Something went wrong adding excuse!");
+            }
+
+            return added;
         }
 
         public Task<Excuse> GetExcuseById(int id)
