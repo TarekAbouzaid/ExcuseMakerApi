@@ -2,10 +2,11 @@
 using DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Models;
 using Services.Interfaces;
 using ErrorEventArgs = Microsoft.AspNetCore.Components.Web.ErrorEventArgs;
 
-namespace Controller
+namespace ExcuseMakerApi.Controllers
 {
     [Route("api")]
     [ApiController]
@@ -26,11 +27,11 @@ namespace Controller
             var added = await _service.Add(excuse);
             if (added)
                 return CreatedAtAction("GetExcuseById", new { id = excuse.Id }, excuse);
-            else
-                return StatusCode(400, "Something went wrong");
+            return StatusCode(400, "Something went wrong");
         }
 
         [HttpGet]
+        [Route("GetById")]
         public async Task<IActionResult> GetExcuseById(int id)
         {
             Excuse excuseFromDb = await _service.GetExcuseById(id);
@@ -40,22 +41,39 @@ namespace Controller
         }
 
         [HttpGet]
-        [Route("GetAll")]
-        public IActionResult GetExcuseById()
+        [Route("GetByCategory")]
+        public async Task<IActionResult> GetExcuseByCategory(ExcuseCategory category)
         {
-            throw new NotImplementedException();
+            var excusesFromDb = await _service.GetExcusesByCategory(category);
+
+            if (excusesFromDb == null) return NotFound();
+            return Ok("found");
+        }
+
+        [HttpGet]
+        [Route("GetAllExcuses")]
+        public async Task<IActionResult> GetAllExcuses()
+        {
+            var excusesFromDb = await _service.GetAllExcuses();
+
+            if (excusesFromDb == null) return NotFound();
+            return Ok("found");
         }
 
         [HttpDelete]
-        public IActionResult DeleteExcuseById(int id)
+        public async Task<IActionResult> DeleteExcuseById(int id)
         {
-            throw new NotImplementedException();
+            var deleted = await _service.DeleteExcuse(id);
+            if (!deleted) return NotFound();
+            return Ok($@"deleted ({id})");
         }
 
         [HttpPut]
-        public IActionResult UpdateExcuse(Excuse excuse)
+        public async Task<IActionResult> UpdateExcuse(Excuse excuse)
         {
-            throw new NotImplementedException();
+            var updated = await _service.UpdateExcuse(excuse);
+            if (!updated) return NotFound();
+            return Ok($@"updated ({excuse.Id})");
         }
     }
 }

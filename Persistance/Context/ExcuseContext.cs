@@ -1,5 +1,6 @@
 ﻿using DTO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Persistance.Interfaces;
 
 namespace Persistance.Context

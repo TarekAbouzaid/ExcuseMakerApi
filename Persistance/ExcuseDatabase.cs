@@ -1,4 +1,6 @@
 ﻿using DTO;
+using Microsoft.EntityFrameworkCore;
+using Models;
 using Persistance.Context;
 using Persistance.Interfaces;
 
@@ -29,23 +31,27 @@ public class ExcuseDatabase : IExcuseDatabase
 
     public async Task<Excuse?> GetExcuseById(int id)
     {
-        var excuse = _context.Excuses
-            .FirstOrDefault(ex => ex.Id == id);
-        return excuse;
+        return await _context.Excuses
+            .FirstOrDefaultAsync(ex => ex.Id == id);
+    }
+
+    public async Task<IEnumerable<Excuse>> GetExcusesByCategory(ExcuseCategory category)
+    {
+        return _context.Excuses
+            .Where(ex => ex.Category == category);
     }
 
     public async Task<IEnumerable<Excuse>> GetAllExcuses()
     {
-        var contextExcuses = _context.Excuses;
-        return contextExcuses;
+        return _context.Excuses;
     }
 
     public async Task<bool> DeleteExcuse(int id)
     {
         try
         {
-            var excuse = _context.Excuses
-                .FirstOrDefault(ex => ex.Id == id);
+            var excuse = await _context.Excuses
+                .FirstOrDefaultAsync(ex => ex.Id == id);
             _context.Excuses.Remove(excuse);
             await _context.SaveChangesAsync();
             return true;
@@ -60,8 +66,8 @@ public class ExcuseDatabase : IExcuseDatabase
     {
         try
         {
-            var excuseToChange = _context.Excuses
-                .FirstOrDefault(ex => ex.Id == excuse.Id);
+            var excuseToChange = await _context.Excuses
+                .FirstOrDefaultAsync(ex => ex.Id == excuse.Id);
             if (excuseToChange == null)
                 return false;
             excuseToChange.Id = excuse.Id;
@@ -69,7 +75,6 @@ public class ExcuseDatabase : IExcuseDatabase
             excuseToChange.Category = excuse.Category;
             await _context.SaveChangesAsync();
             return true;
-
         }
         catch (Exception e)
         {

@@ -3,6 +3,7 @@ using Persistance.Interfaces;
 using Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using Models;
 
 namespace Services.Services
 {
@@ -23,30 +24,72 @@ namespace Services.Services
             if (!added)
             {
                 _logger.LogError("Something went wrong adding excuse!");
-                throw new Exception(HttpStatusCode.BadRequest + "Something went wrong adding excuse!");
+                throw new Exception(HttpStatusCode.BadRequest + ": Something went wrong adding excuse!");
             }
 
             return added;
         }
 
-        public Task<Excuse> GetExcuseById(int id)
+        public async Task<Excuse> GetExcuseById(int id)
         {
-            throw new NotImplementedException();
+            var excuseById = await _database.GetExcuseById(id);
+            if (excuseById == null)
+            {
+                _logger.LogError($@"Something went wrong getting excuse with id({id})!");
+                throw new Exception(
+                    $@"{HttpStatusCode.BadRequest}: Something went wrong getting excuse with id({id})!");
+            }
+
+            return excuseById;
         }
 
-        public Task<IEnumerable<Excuse>> GetAllExcuses()
+        public async Task<IEnumerable<Excuse>> GetExcusesByCategory(ExcuseCategory category)
         {
-            throw new NotImplementedException();
+            var excusesByCategory = await _database.GetExcusesByCategory(category);
+            if (excusesByCategory == null)
+            {
+                _logger.LogError($@"Something went wrong getting excuse în categroy ({category})!");
+                throw new Exception(
+                    $@"{HttpStatusCode.BadRequest}: Something went wrong getting excuse în categroy ({category})!");
+            }
+
+            return excusesByCategory;
         }
 
-        public Task<bool> DeleteExcuse(int id)
+        public async Task<IEnumerable<Excuse>> GetAllExcuses()
         {
-            throw new NotImplementedException();
+            var excuses = await _database.GetAllExcuses();
+            if (excuses == null)
+            {
+                _logger.LogError("Something went wrong getting all excuses!");
+                throw new Exception($@"{HttpStatusCode.BadRequest}: Something went wrong getting all excuses!");
+            }
+
+            return excuses;
         }
 
-        public Task<bool> UpdateExcuse(int id)
+        public async Task<bool> DeleteExcuse(int id)
         {
-            throw new NotImplementedException();
+            var deleted = await _database.DeleteExcuse(id);
+            if (!deleted)
+            {
+                _logger.LogError($@"Something went wrong deleting excuse with id{id}!");
+                throw new Exception($@"{HttpStatusCode.BadRequest}: Something went wrong deleting excuse{id}!");
+            }
+
+            return true;
+        }
+
+        public async Task<bool> UpdateExcuse(Excuse excuse)
+        {
+            var updated = await _database.UpdateExcuse(excuse);
+            if (!updated)
+            {
+                _logger.LogError($@"Something went wrong updating excuse with id{excuse.Id}!");
+                throw new Exception($@"{HttpStatusCode.BadRequest}: Something went wrong updating excuse{excuse.Id}!");
+            }
+
+            return true;
         }
     }
 }
