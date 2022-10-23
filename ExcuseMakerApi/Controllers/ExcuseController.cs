@@ -45,5 +45,17 @@ namespace Controller
         {
             throw new NotImplementedException();
         }
+
+        [HttpDelete]
+        public IActionResult DeleteExcuseById(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpPut]
+        public IActionResult UpdateExcuse(Excuse excuse)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
