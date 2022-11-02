@@ -9,6 +9,7 @@ COPY ["Services/Services.csproj", "Services/"]
 COPY ["DTO/DTO.csproj", "DTO/"]
 COPY ["Persistance/Persistance.csproj", "Persistance/"]
 COPY ["ExcuseMakerApi/ExcuseMakerApi.csproj", "ExcuseMakerApi/"]
+COPY ["Models/Models.csproj", "Models/"]
 COPY ["ExcuseMakerApi.sln", "./"]
 
 RUN dotnet restore
