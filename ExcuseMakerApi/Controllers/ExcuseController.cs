@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Services.Interfaces;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using ErrorEventArgs = Microsoft.AspNetCore.Components.Web.ErrorEventArgs;
 
 namespace ExcuseMakerApi.Controllers
@@ -47,7 +48,7 @@ namespace ExcuseMakerApi.Controllers
             var excusesFromDb = await _service.GetExcusesByCategory(category);
 
             if (excusesFromDb == null) return NotFound();
-            return Ok("found");
+            return Ok(excusesFromDb);
         }
 
         [HttpGet]
@@ -57,7 +58,7 @@ namespace ExcuseMakerApi.Controllers
             var excusesFromDb = await _service.GetAllExcuses();
 
             if (excusesFromDb == null) return NotFound();
-            return Ok("found");
+            return Ok(excusesFromDb);
         }
 
         [HttpDelete]
@@ -74,6 +75,16 @@ namespace ExcuseMakerApi.Controllers
             var updated = await _service.UpdateExcuse(excuse);
             if (!updated) return NotFound();
             return Ok($@"updated ({excuse.Id})");
+        }
+
+        [HttpGet]
+        [Route("GetRandomExcuse")]
+        public async Task<IActionResult> GetRandomExcuse(ExcuseCategory category)
+        {
+            Excuse randomExcuse = await _service.GetRandomExcuse(category);
+            if (randomExcuse == null) return NotFound();
+            return Ok(randomExcuse.Text);
+
         }
     }
 }

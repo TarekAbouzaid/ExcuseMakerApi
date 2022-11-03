@@ -91,5 +91,19 @@ namespace Services.Services
 
             return true;
         }
+
+        public async Task<Excuse> GetRandomExcuse(ExcuseCategory category)
+        {
+
+            var randomExcuse = await _database.GetRandomExcuse(category);
+            if(randomExcuse == null)
+            {
+                _logger.LogError($@"Something went wrong getting a random excuse in categroy ({category})!");
+                throw new Exception(
+                    $@"{HttpStatusCode.BadRequest}: Something went wrong getting a random excuse in categroy ({category})!");
+            }
+            return randomExcuse;
+
+        }
     }
 }

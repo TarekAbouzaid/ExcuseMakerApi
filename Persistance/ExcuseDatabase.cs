@@ -9,10 +9,11 @@ namespace Persistance;
 public class ExcuseDatabase : IExcuseDatabase
 {
     public readonly ExcuseContext _context;
-
+    private readonly Random _randomizer;
     public ExcuseDatabase(ExcuseContext context)
     {
         _context = context;
+        _randomizer = new Random();
     }
 
     public async Task<bool> Add(Excuse ex)
@@ -80,5 +81,20 @@ public class ExcuseDatabase : IExcuseDatabase
         {
             return false;
         }
+    }
+
+    public async Task<Excuse> GetRandomExcuse(ExcuseCategory category)
+    {
+        try
+        {
+            var excusesBySelectedCategory = _context.Excuses.Where(ex => ex.Category == category).OrderBy(ex=>ex.Id);
+            var rNum = _randomizer.Next(excusesBySelectedCategory.First().Id, excusesBySelectedCategory.Last().Id);
+            return await _context.Excuses.FirstOrDefaultAsync(ex => ex.Id == rNum);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+
     }
 }
