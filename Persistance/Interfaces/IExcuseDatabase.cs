@@ -1,9 +1,9 @@
 ﻿using DTO;
 using Models;
 
-namespace Services.Interfaces;
+namespace Persistance.Interfaces;
 
-public interface IExcuseService
+public interface IExcuseDatabase
 {
     public Task<bool> Add(Excuse ex);
     public Task<Excuse> GetExcuseById(int id);
