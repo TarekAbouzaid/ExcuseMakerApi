@@ -18,7 +18,7 @@ namespace Services.Services
             _logger = logger;
         }
 
-        public async Task<bool> Add(Excuse ex)
+        public async Task<bool> Add(Excuse? ex)
         {
             var added = await _database.Add(ex);
             if (!added)
@@ -94,16 +94,15 @@ namespace Services.Services
 
         public async Task<Excuse> GetRandomExcuse(ExcuseCategory category)
         {
-
             var randomExcuse = await _database.GetRandomExcuse(category);
-            if(randomExcuse == null)
+            if (randomExcuse == null)
             {
                 _logger.LogError($@"Something went wrong getting a random excuse in categroy ({category})!");
                 throw new Exception(
                     $@"{HttpStatusCode.BadRequest}: Something went wrong getting a random excuse in categroy ({category})!");
             }
-            return randomExcuse;
 
+            return randomExcuse;
         }
     }
 }

@@ -10,13 +10,14 @@ public class ExcuseDatabase : IExcuseDatabase
 {
     public readonly ExcuseContext _context;
     private readonly Random _randomizer;
+
     public ExcuseDatabase(ExcuseContext context)
     {
         _context = context;
         _randomizer = new Random();
     }
 
-    public async Task<bool> Add(Excuse ex)
+    public async Task<bool> Add(Excuse? ex)
     {
         try
         {
@@ -24,7 +25,7 @@ public class ExcuseDatabase : IExcuseDatabase
             await _context.SaveChangesAsync();
             return true;
         }
-        catch (Exception e)
+        catch
         {
             return false;
         }
@@ -36,15 +37,16 @@ public class ExcuseDatabase : IExcuseDatabase
             .FirstOrDefaultAsync(ex => ex.Id == id);
     }
 
-    public async Task<IEnumerable<Excuse>> GetExcusesByCategory(ExcuseCategory category)
+    public async Task<IEnumerable<Excuse?>> GetExcusesByCategory(ExcuseCategory category)
     {
-        return _context.Excuses
-            .Where(ex => ex.Category == category);
+        return await _context.Excuses
+            .Where(ex => ex.Category == category)
+            .ToListAsync();
     }
 
-    public async Task<IEnumerable<Excuse>> GetAllExcuses()
+    public async Task<IEnumerable<Excuse?>> GetAllExcuses()
     {
-        return _context.Excuses;
+        return await _context.Excuses.ToListAsync();
     }
 
     public async Task<bool> DeleteExcuse(int id)
@@ -57,7 +59,7 @@ public class ExcuseDatabase : IExcuseDatabase
             await _context.SaveChangesAsync();
             return true;
         }
-        catch (Exception e)
+        catch
         {
             return false;
         }
@@ -77,24 +79,24 @@ public class ExcuseDatabase : IExcuseDatabase
             await _context.SaveChangesAsync();
             return true;
         }
-        catch (Exception e)
+        catch
         {
             return false;
         }
     }
 
-    public async Task<Excuse> GetRandomExcuse(ExcuseCategory category)
+    public async Task<Excuse?> GetRandomExcuse(ExcuseCategory category)
     {
         try
         {
-            var excusesBySelectedCategory = _context.Excuses.Where(ex => ex.Category == category).OrderBy(ex=>ex.Id);
-            var rNum = _randomizer.Next(excusesBySelectedCategory.First().Id, excusesBySelectedCategory.Last().Id);
+            var excusesBySelectedCategory = _context.Excuses.Where(ex => ex.Category == category).OrderBy(ex => ex.Id);
+            var rNum = _randomizer.Next(excusesBySelectedCategory.FirstOrDefault()!.Id,
+                excusesBySelectedCategory.LastOrDefault()!.Id);
             return await _context.Excuses.FirstOrDefaultAsync(ex => ex.Id == rNum);
         }
-        catch (Exception e)
+        catch
         {
             return null;
         }
-
     }
 }

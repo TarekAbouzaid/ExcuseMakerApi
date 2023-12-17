@@ -1,11 +1,7 @@
-﻿using System.Linq;
-using DTO;
-using Microsoft.AspNetCore.Http;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Services.Interfaces;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using ErrorEventArgs = Microsoft.AspNetCore.Components.Web.ErrorEventArgs;
 
 namespace ExcuseMakerApi.Controllers
 {
@@ -23,21 +19,20 @@ namespace ExcuseMakerApi.Controllers
         //localhost:44398/api/excuse
 
         [HttpPost] //Create Excuse
-        public async Task<IActionResult> CreateExcuse(Excuse excuse)
+        public async Task<IActionResult> CreateExcuse(Excuse? excuse)
         {
             var added = await _service.Add(excuse);
-            if (added)
-                return CreatedAtAction("GetExcuseById", new { id = excuse.Id }, excuse);
-            return StatusCode(400, "Something went wrong");
+            return added
+                ? CreatedAtAction("GetExcuseById", new { id = excuse.Id }, excuse)
+                : StatusCode(400, "Something went wrong");
         }
 
         [HttpGet]
         [Route("GetById")]
         public async Task<IActionResult> GetExcuseById(int id)
         {
-            Excuse excuseFromDb = await _service.GetExcuseById(id);
+            var excuseFromDb = await _service.GetExcuseById(id);
 
-            if (excuseFromDb == null) return NotFound();
             return Ok(excuseFromDb);
         }
 
@@ -47,7 +42,6 @@ namespace ExcuseMakerApi.Controllers
         {
             var excusesFromDb = await _service.GetExcusesByCategory(category);
 
-            if (excusesFromDb == null) return NotFound();
             return Ok(excusesFromDb);
         }
 
@@ -57,7 +51,6 @@ namespace ExcuseMakerApi.Controllers
         {
             var excusesFromDb = await _service.GetAllExcuses();
 
-            if (excusesFromDb == null) return NotFound();
             return Ok(excusesFromDb);
         }
 
@@ -81,10 +74,8 @@ namespace ExcuseMakerApi.Controllers
         [Route("GetRandomExcuse")]
         public async Task<IActionResult> GetRandomExcuse(ExcuseCategory category)
         {
-            Excuse randomExcuse = await _service.GetRandomExcuse(category);
-            if (randomExcuse == null) return NotFound();
+            var randomExcuse = await _service.GetRandomExcuse(category);
             return Ok(randomExcuse.Text);
-
         }
     }
 }

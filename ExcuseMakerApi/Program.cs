@@ -1,11 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using Persistance;
 using Persistance.Context;
 using Persistance.Interfaces;
 using Services.Interfaces;
 using Services.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer;
 
+namespace ExcuseMakerApi;
 
 internal class Program
 {
@@ -24,12 +24,12 @@ internal class Program
         builder.Services.AddScoped<IExcuseDatabase, ExcuseDatabase>();
         builder.Services.AddScoped<IExcuseService, ExcuseService>();
 
-        Console.WriteLine("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + builder.Configuration.GetConnectionString("DbConnString"));
+        Console.WriteLine(builder.Configuration.GetConnectionString("DbConnString"));
 
         var connString = builder.Configuration.GetConnectionString("DbConnString");
         builder.Services.AddDbContext<ExcuseContext>(options => options.UseSqlServer(connString));
         var app = builder.Build();
-        
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {

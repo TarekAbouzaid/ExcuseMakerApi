@@ -1,4 +1,5 @@
-﻿using Models;
+﻿using System.Text.Json.Serialization;
+using Models;
 
 namespace DTO
 {
