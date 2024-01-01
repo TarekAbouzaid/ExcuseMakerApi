@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Polly;
+using Polly.CircuitBreaker;
+using Polly.Extensions.Http;
 using Polly.Retry;
 using Polly.Timeout;
 using Services.Interfaces;
@@ -15,6 +17,7 @@ namespace ExcuseMakerApi.Controllers
         private readonly IExcuseService _service;
         private readonly AsyncRetryPolicy _retryPolicy;
         private readonly AsyncTimeoutPolicy _timeoutPolicy;
+        private readonly AsyncCircuitBreakerPolicy _circuitBreaker;
 
         public ExcuseController(IExcuseService service)
         {
@@ -27,86 +30,115 @@ namespace ExcuseMakerApi.Controllers
 
             // Timeout policy after 5 seconds
             _timeoutPolicy = Policy.TimeoutAsync(TimeSpan.FromSeconds(5));
+
+            _circuitBreaker = Policy.Handle<HttpRequestException>()
+                .CircuitBreakerAsync(
+                    exceptionsAllowedBeforeBreaking: 2,
+                    durationOfBreak: TimeSpan.FromMinutes(1)
+                );
+
         }
 
         [HttpPost] //Create Excuse
         public async Task<IActionResult> CreateExcuse(Excuse? excuse)
         {
-            var added = await _service.Add(excuse);
-            return added
-                ? CreatedAtAction("GetExcuseById", new { id = excuse.Id }, excuse)
-                : StatusCode(400, "Something went wrong");
+            return await _circuitBreaker.ExecuteAsync(async () =>
+            {
+                var added = await _service.Add(excuse);
+                return added
+                    ? CreatedAtAction("GetExcuseById", new { id = excuse.Id }, excuse)
+                    : StatusCode(400, "Something went wrong");
+            });
         }
 
         [HttpGet]
         [Route("GetById")]
         public async Task<IActionResult> GetExcuseById(int id)
         {
-            var excuseFromDb = await _service.GetExcuseById(id);
-            return Ok(excuseFromDb);
+            return await _circuitBreaker.ExecuteAsync(async () =>
+            {
+                var excuseFromDb = await _service.GetExcuseById(id);
+                return Ok(excuseFromDb);
+            });
+
         }
 
         [HttpGet]
         [Route("GetByCategory")]
         public async Task<IActionResult> GetExcuseByCategory(ExcuseCategory category)
         {
-            var excusesFromDb = await _service.GetExcusesByCategory(category);
-            return Ok(excusesFromDb);
+            return await _circuitBreaker.ExecuteAsync(async () =>
+            {
+                var excusesFromDb = await _service.GetExcusesByCategory(category);
+                return Ok(excusesFromDb);
+            });
         }
 
         [HttpGet]
         [Route("GetAllExcuses")]
         public async Task<IActionResult> GetAllExcuses()
         {
-            var excusesFromDb = await _service.GetAllExcuses();
-            return Ok(excusesFromDb);
+            return await _circuitBreaker.ExecuteAsync(async () =>
+            {
+                var excusesFromDb = await _service.GetAllExcuses();
+                return Ok(excusesFromDb);
+            });
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteExcuseById(int id)
         {
-            var deleted = await _service.DeleteExcuse(id);
-            return deleted ? Ok($"deleted ({id})") : NotFound();
+            return await _circuitBreaker.ExecuteAsync(async () =>
+            {
+                var deleted = await _service.DeleteExcuse(id);
+                return deleted ? Ok($"deleted ({id})") : NotFound() as IActionResult;
+            });
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateExcuse(Excuse excuse)
         {
-            var updated = await _service.UpdateExcuse(excuse);
-            return updated ? Ok($"updated ({excuse.Id})") : NotFound();
+            return await _circuitBreaker.ExecuteAsync(async () =>
+            {
+                var updated = await _service.UpdateExcuse(excuse);
+                return updated ? Ok($"updated ({excuse.Id})") as IActionResult : NotFound() as IActionResult;
+            });
         }
         
         [HttpGet]
         [Route("GetRandomExcuse")]
         public async Task<IActionResult> GetRandomExcuse(ExcuseCategory category)
         {
-            try
+            return await _circuitBreaker.ExecuteAsync(async () =>
             {
-                var policyWrap = Policy.WrapAsync(_retryPolicy, _timeoutPolicy);
+                try
+                {
+                    var policyWrap = Policy.WrapAsync(_retryPolicy, _timeoutPolicy);
 
-                var randomExcuse = await policyWrap.ExecuteAsync(async ct =>
-                {
-                    return await _service.GetRandomExcuse(category);
-                }, CancellationToken.None);
+                    var randomExcuse = await policyWrap.ExecuteAsync(async ct =>
+                    {
+                        return await _service.GetRandomExcuse(category);
+                    }, CancellationToken.None);
 
-                if (randomExcuse != null)
-                {
-                    return Ok(randomExcuse.Text);
+                    if (randomExcuse != null)
+                    {
+                        return Ok(randomExcuse.Text) as IActionResult;
+                    }
+                    else
+                    {
+                        return NotFound(); // Handle not found scenario appropriately
+                    }
                 }
-                else
+                catch (TimeoutRejectedException)
                 {
-                    return NotFound(); // Handle not found scenario appropriately
+                    return StatusCode(500, "Request timed out");
                 }
-            }
-            catch (TimeoutRejectedException)
-            {
-                return StatusCode(500, "Request timed out");
-            }
-            catch (Exception ex)
-            {
-                // Log or handle other exceptions
-                return StatusCode(500, "An error occurred while fetching the random excuse.");
-            }
+                catch (Exception ex)
+                {
+                    // Log or handle other exceptions
+                    return StatusCode(500, "An error occurred while fetching the random excuse.");
+                }
+            });
         }
     }
 }
