@@ -39,6 +39,10 @@ namespace ExcuseMakerApi.Controllers
 
         }
 
+        /// <summary>
+        /// Creates an excuse and adds to service
+        /// </summary>
+        /// <param name="excuse"></param>
         [HttpPost] //Create Excuse
         public async Task<IActionResult> CreateExcuse(Excuse? excuse)
         {
@@ -51,6 +55,10 @@ namespace ExcuseMakerApi.Controllers
             });
         }
 
+        /// <summary>
+        /// Gets an excuse by ID
+        /// </summary>
+        /// <param name="excuse"></param>
         [HttpGet]
         [Route("GetById")]
         public async Task<IActionResult> GetExcuseById(int id)
@@ -63,6 +71,10 @@ namespace ExcuseMakerApi.Controllers
 
         }
 
+        /// <summary>
+        /// Gets an excuse by category
+        /// </summary>
+        /// <param name="excuse"></param>
         [HttpGet]
         [Route("GetByCategory")]
         public async Task<IActionResult> GetExcuseByCategory(ExcuseCategory category)
@@ -74,6 +86,10 @@ namespace ExcuseMakerApi.Controllers
             });
         }
 
+        /// <summary>
+        /// Gets all excuses
+        /// </summary>
+        /// <param name="excuse"></param>
         [HttpGet]
         [Route("GetAllExcuses")]
         public async Task<IActionResult> GetAllExcuses()
@@ -85,6 +101,10 @@ namespace ExcuseMakerApi.Controllers
             });
         }
 
+        /// <summary>
+        /// Delete an excuse by ID
+        /// </summary>
+        /// <param name="excuse"></param>
         [HttpDelete]
         public async Task<IActionResult> DeleteExcuseById(int id)
         {
@@ -95,6 +115,10 @@ namespace ExcuseMakerApi.Controllers
             });
         }
 
+        /// <summary>
+        /// Update an excuse
+        /// </summary>
+        /// <param name="excuse"></param>
         [HttpPut]
         public async Task<IActionResult> UpdateExcuse(Excuse excuse)
         {
@@ -105,6 +129,10 @@ namespace ExcuseMakerApi.Controllers
             });
         }
         
+        /// <summary>
+        /// Get a random excuse
+        /// </summary>
+        /// <param name="excuse"></param>
         [HttpGet]
         [Route("GetRandomExcuse")]
         public async Task<IActionResult> GetRandomExcuse(ExcuseCategory category)
