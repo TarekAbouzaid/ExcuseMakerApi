@@ -74,7 +74,8 @@ Here are some API endpoints:
 
 ## Setting up the Database
 
-The application uses Entity Framework Core for database operations. The database is automatically migrated when the application is started.
+The application uses Entity Framework Core for database operations. Before the application is started, the Database has to be manually created with the name `Excuses`.
+The database is automatically migrated when the application is started.
 
 Ensure that your database connection string is correctly configured in the `appsettings.json` file in the `ConnectionStrings` section.
 
